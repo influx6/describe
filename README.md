@@ -2,8 +2,8 @@
 Restark provides a base library for constructing a stack-based definition package which allows creating functions chains
 that are easily expressed to create complex structures.
 
-The whole idea is once can define re-usable blocks of functions that define and augment a type of structure which 
-can be built by applying said functions to any instance of that type.
+The whole idea is one can define re-usable blocks of functions that define and augment a type, these created set can then  
+be re-applied as many times as desirable to any instance of that type.
 
 ```go
 var jsondef JSONDefinition
