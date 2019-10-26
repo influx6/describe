@@ -18,21 +18,6 @@ type DefStack struct {
 	stacks []Definition
 }
 
-// Apply applies provided value to the current top element
-// within provided stack.
-func (s *DefStack) Apply(v interface{}) error {
-	if s.err != nil {
-		return s.err
-	}
-
-	var current, err = s.Get()
-	if err != nil {
-		return err
-	}
-
-	return current.Apply(v)
-}
-
 // SetErr sets the error returned when DefStack.Apply is
 // called.
 func (s *DefStack) SetErr(err error) {
@@ -42,12 +27,6 @@ func (s *DefStack) SetErr(err error) {
 // Err returns possible attached error of a giving DefStack.
 func (s *DefStack) Err() error {
 	return s.err
-}
-
-// Elem returns the DefStack which ensures it matches the Definition
-// interface.
-func (s *DefStack) Elem() interface{} {
-	return s
 }
 
 // Push adds a new item into the Definition list.
