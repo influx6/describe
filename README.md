@@ -12,8 +12,9 @@ var res, err = restark.Define(func(obj *restark.DefStack) {
         Desc(obj, "Desc")
     })
 })(&jsondef)
+```
 
-
+```go
 type JSONDefinition struct {
 	Target *Rob
 }
