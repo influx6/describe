@@ -39,6 +39,11 @@ func (s *DefStack) SetErr(err error) {
 	s.err = err
 }
 
+// Err returns possible attached error of a giving DefStack.
+func (s *DefStack) Err() error {
+	return s.err
+}
+
 // Elem returns the DefStack which ensures it matches the Definition
 // interface.
 func (s *DefStack) Elem() interface{} {
