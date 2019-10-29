@@ -6,10 +6,15 @@ import (
 	"github.com/influx6/npkg/nerror"
 )
 
+type ApplicableType interface {
+	Elem() interface{}
+}
+
 // Applicable defines the base type which is to be applied to
 // given function.
 type Applicable interface {
-	Elem() interface{}
+	ApplicableType
+
 	Apply(interface{}) error
 }
 
