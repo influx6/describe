@@ -13,6 +13,12 @@ type Applicable interface {
 	Apply(interface{}) error
 }
 
+// Reapplied defines an interface where a type is to be
+// applied to a Applicable type.
+type Reapplied interface {
+	Apply(Applicable) error
+}
+
 // DefStack manages a stack of Applicable implementing
 // objects which allows popping and pushing value.
 type DefStack struct {
@@ -64,6 +70,21 @@ func (s *DefStack) Pop() Applicable {
 	elem := s.stacks[len(s.stacks)-1]
 	s.stacks = s.stacks[:len(s.stacks)-1]
 	return elem
+}
+
+// Apply applies provided target to the provided current
+// top element on the stack.
+func (s *DefStack) Apply(target interface{}) error {
+	var appl, err = s.Get()
+	if err != nil {
+		return err
+	}
+
+	if re, ok := target.(Reapplied); ok {
+		return re.Apply(appl)
+	}
+
+	return appl.Apply(target)
 }
 
 // Release will pop the current top elements on the stack
