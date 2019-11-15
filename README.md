@@ -1,5 +1,5 @@
-# Restark
-Restark provides a base library for constructing a stack-based definition package which allows creating functions chains
+# Describe
+Describe provides a base library for constructing a stack-based definition package which allows creating functions chains
 that are easily expressed to create complex structures.
 
 The whole idea is one can define re-usable blocks of functions that define and augment a type, these created set can then be re-applied as many times as desirable to any instance of any type that supports it's expected interface contract. This means we can construct a DSL format which can be used to express different structures easily with the added benefit of organization and reuse. The contract then allows the receiving type to define what it expects, the rules for it's defining parts.

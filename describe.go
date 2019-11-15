@@ -9,13 +9,11 @@ import (
 // Applicable defines the base type which is to be applied to
 // given function.
 type Applicable interface {
-	Elem() interface{}
 	Apply(interface{}) error
 }
 
-// Reapplied defines an interface where a type is to be
-// applied to a Applicable type.
-type Reapplied interface {
+// ReApplicable applies some operation to the Applicable.
+type ReApplicable interface {
 	Apply(Applicable) error
 }
 
@@ -38,7 +36,7 @@ func (s *DefStack) Err() error {
 }
 
 // Push adds a new item into the Applicable list.
-func (s *DefStack) Push(item Applicable) {
+func (s *DefStack) Push(item interface{}) {
 	s.stacks = append(s.stacks, item)
 }
 
@@ -80,7 +78,7 @@ func (s *DefStack) Apply(target interface{}) error {
 		return err
 	}
 
-	if re, ok := target.(Reapplied); ok {
+	if re, ok := target.(ReApplicable); ok {
 		return re.Apply(appl)
 	}
 
@@ -101,6 +99,12 @@ func (s *DefStack) Release() {
 		return
 	}
 
+	var applicable, ok = parent.(Applicable)
+	if !ok {
+		s.SetErr(nerror.New("parent is not an Applicable"))
+		return
+	}
+
 	if err = parent.Apply(current); err != nil {
 		s.SetErr(err)
 	}
@@ -116,7 +120,7 @@ type Definition func(stack *DefStack)
 
 // DefinitionApplication defines the function type which represents the
 // target for a definition function
-type DefinitionApplication func(source Applicable) (Applicable, error)
+type DefinitionApplication func(source interface{}) (interface{}, error)
 
 // Compose combines giving series of definitions as a single Applicable.
 //
@@ -186,7 +190,7 @@ func ApplyToLast() Definition {
 // An error is returned if any definition (that is either the main or internals) fail
 // to meet defined criteria.
 func Define(fn ...Definition) DefinitionApplication {
-	return func(source Applicable) (Applicable, error) {
+	return func(source interface{}) (interface{}, error) {
 		// Create the Applicable stack which will hold
 		// ever increasing definitions from child to parent contexts.
 		var stack DefStack
