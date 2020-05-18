@@ -1,5 +1,5 @@
-# Restark
-Restark provides a base library for constructing a stack-based definition package which allows creating functions chains
+# Describe
+Describe provides a base library for constructing a stack-based definition package which allows creating functions chains
 that are easily expressed to create complex structures.
 
 The whole idea is one can define re-usable blocks of functions that define and augment a type, these created set can then be re-applied as many times as desirable to any instance of any type that supports it's expected interface contract. This means we can construct a DSL format which can be used to express different structures easily with the added benefit of organization and reuse. The contract then allows the receiving type to define what it expects, the rules for it's defining parts.
@@ -8,7 +8,7 @@ The goal of this package is to provide a base DSL which can be used to expressed
 
 ```go
 var jsondef JSONDefinition
-var res, err = restark.Define(func(obj *restark.DefStack) {
+var res, err = describe.Define(func(obj *describe.DefStack) {
     Object(obj, func() {
         Name(obj, "Nature")
         Desc(obj, "Desc")
@@ -42,7 +42,7 @@ func (j *Rob) Apply(v interface{}) error {
 	return nil
 }
 
-func Object(r *restark.DefStack, fn func()) {
+func Object(r *describe.Description, fn func()) {
 	var obj Rob
 
 	// Push object into task so functions
@@ -67,7 +67,7 @@ func Object(r *restark.DefStack, fn func()) {
 	objParent.Target = &obj
 }
 
-func Name(r *restark.DefStack, name string) {
+func Name(r *describe.Description, name string) {
 	var parent, err = r.Get()
 	if err != nil {
 		return
@@ -82,7 +82,7 @@ func Name(r *restark.DefStack, name string) {
 	objParent.Name = name
 }
 
-func Desc(r *restark.DefStack, desc string) {
+func Desc(r *describe.Description, desc string) {
 	var parent, err = r.Get()
 	if err != nil {
 		return
