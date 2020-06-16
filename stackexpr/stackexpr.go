@@ -1,16 +1,11 @@
-package describe
+package stackexpr
 
 import (
-	"errors"
 	"github.com/influx6/npkg/nerror"
+	. "github.com/influx6/rewrite"
 )
 
-var ErrNotApplicable = errors.New("cant apply to target")
 var defaultEmptyApplicable = EmptyApplicable{}
-
-// DefinitionMiddleware defines the function type which represents the
-// target for a definition function
-type DefinitionMiddleware func(source Applicable) (Applicable, error)
 
 type EmptyApplicable struct{}
 
@@ -21,17 +16,6 @@ func (e EmptyApplicable) Elem() interface{} {
 func (e EmptyApplicable) Apply(_ interface{}) error {
 	return nerror.New("empty applicable")
 }
-
-// Applicable defines the base type which is to be applied to
-// given function.
-type Applicable interface {
-	Elem() interface{}
-	Apply(interface{}) error
-}
-
-// Definition defines a function type which represents
-// an operation to be applied to a provided stack element.
-type Definition func(stack *Description)
 
 // Description manages a stack of Applicable implementing
 // objects which allows popping and pushing value.
@@ -56,29 +40,29 @@ func (s *Description) Push(item Applicable) {
 	s.stacks = append(s.stacks, item)
 }
 
-// First returns first Applicable object in stack.
+// Root returns first Applicable object in stack.
 // Usually the first Applicable is the source and
 // root of all defined Definitions.
 //
 // If there are no elements in stack, a default EmptyApplicable
 // is returned.
-func (s *Description) First() Applicable {
+func (s *Description) Root() Applicable {
 	if len(s.stacks) == 0 {
 		return defaultEmptyApplicable
 	}
 	return s.stacks[0]
 }
 
-// IsEmpty returns true/false if stack is empty.
-func (s *Description) IsEmpty() bool {
+// IsUsable returns true/false if stack is empty.
+func (s *Description) IsUsable() bool {
 	return len(s.stacks) == 0 || s.stacks == nil
 }
 
-// Get returns current Applicable object in stack.
+// Current returns current Applicable object in stack.
 //
 // If there are no elements in stack, a default EmptyApplicable
 // is returned.
-func (s *Description) Get() Applicable {
+func (s *Description) Current() Applicable {
 	var target = s.get()
 	if target == nil {
 		return defaultEmptyApplicable
@@ -104,7 +88,7 @@ func (s *Description) Pop() Applicable {
 // Release will pop the current top elements on the stack
 // applying it to it's parent.
 func (s *Description) Release() {
-	if len(s.stacks) == 1 || s.IsEmpty() {
+	if len(s.stacks) == 1 || s.IsUsable() {
 		return
 	}
 
@@ -115,12 +99,12 @@ func (s *Description) Release() {
 	}
 }
 
-func (s *Description) ApplyDefinitions(definitions ...Definition) {
+func ApplyTo(stack Stack, definitions ...Definition) {
 	for _, definition := range definitions {
-		if s.err != nil {
+		if stack.Err() != nil {
 			return
 		}
-		definition(s)
+		definition(stack)
 	}
 }
 
@@ -133,21 +117,21 @@ func (s *Description) get() Applicable {
 }
 
 func PopApplicable() Definition {
-	return func(root *Description)  {
+	return func(root Stack) {
 		root.Pop()
 	}
 }
 
 func PushApplicable(t Applicable) Definition {
-	return func(root *Description) {
+	return func(root Stack) {
 		root.Push(t)
 	}
 }
 
 func ApplyLastApplicableToFirst() Definition {
-	return func(root *Description)  {
+	return func(root Stack) {
 		var last = root.Pop()
-		var parent = root.First()
+		var parent = root.Root()
 		if err := parent.Apply(last); err != nil {
 			root.SetErr(err)
 		}
@@ -155,7 +139,7 @@ func ApplyLastApplicableToFirst() Definition {
 }
 
 func ApplyLastApplicableToPrevious() Definition {
-	return func(root *Description) {
+	return func(root Stack) {
 		root.Release()
 	}
 }
@@ -164,7 +148,7 @@ func Describe(definitions ...Definition) DefinitionMiddleware {
 	return func(source Applicable) (Applicable, error) {
 		var stack Description
 		stack.Push(source)
-		stack.ApplyDefinitions(definitions...)
+		ApplyTo(&stack, definitions...)
 		return source, stack.err
 	}
 }

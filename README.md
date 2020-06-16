@@ -1,4 +1,4 @@
-# Describe
+# Rewrite
 Describe provides a base library for constructing a stack-based definition package which allows creating functions chains
 that are easily expressed to create complex structures.
 

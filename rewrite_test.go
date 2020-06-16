@@ -1,16 +1,16 @@
-package describe_test
+package rewrite_test
 
 import (
 	"errors"
 	"testing"
 
-	"github.com/influx6/describe"
+	"github.com/influx6/rewrite"
 	"github.com/stretchr/testify/require"
 )
 
 func TestStackDefinitions(t *testing.T) {
 	var jsondef JSONDefinition
-	var res, err = describe.Define(func(obj *describe.Description) {
+	var res, err = rewrite.Define(func(obj *rewrite.Description) {
 		Object(obj, func() {
 			Name(obj, "Nature")
 			Desc(obj, "Desc")
@@ -50,7 +50,7 @@ func (j *Rob) Apply(v interface{}) error {
 	return nil
 }
 
-func Object(r *describe.Description, fn func()) {
+func Object(r *rewrite.Description, fn func()) {
 	var obj Rob
 
 	// Push object into task so functions
@@ -75,7 +75,7 @@ func Object(r *describe.Description, fn func()) {
 	objParent.Target = &obj
 }
 
-func Name(r *describe.Description, name string) {
+func Name(r *rewrite.Description, name string) {
 	var parent, err = r.Get()
 	if err != nil {
 		return
@@ -90,7 +90,7 @@ func Name(r *describe.Description, name string) {
 	objParent.Name = name
 }
 
-func Desc(r *describe.Description, desc string) {
+func Desc(r *rewrite.Description, desc string) {
 	var parent, err = r.Get()
 	if err != nil {
 		return

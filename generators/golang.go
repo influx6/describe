@@ -1,12 +1,11 @@
 package generators
 
 import (
-	"github.com/influx6/describe"
-	"github.com/influx6/describe/astlang"
+	"github.com/influx6/rewrite"
 )
 import "github.com/dave/jennifer/jen"
 
-func Render(pkg astlang.PackageDefinition) *jen.File {
+func Render(pkg rewrite.PackageDefinition) *jen.File {
 	var code = jen.NewFile(pkg.GetName())
 	code.Comment(pkg.GetDescription())
 	code.Comment("\n")
@@ -19,32 +18,32 @@ func Render(pkg astlang.PackageDefinition) *jen.File {
 	return code
 }
 
-func render(file *jen.File, definition describe.Applicable) {
+func render(file *jen.File, definition rewrite.Applicable) {
 	switch def := definition.Elem().(type) {
-	case astlang.VariableDefinition:
+	case rewrite.VariableDefinition:
 		renderVariable(file, def)
-	case astlang.AssignmentDefinition:
+	case rewrite.AssignmentDefinition:
 		renderAssignment(file, def)
-	case astlang.AnnotationDefinition:
-	case astlang.CommentDefinition:
-	case astlang.ResultDefinition:
-	case astlang.DataDefinition:
-	case astlang.DataTypeDefinition:
-	case astlang.ConditionDefinition:
-	case astlang.IfDefinition:
-	case astlang.ReturnDefinition:
-	case astlang.LoopDefinition:
-	case astlang.ForDefinition:
-	case astlang.CaseDefinition:
-	case astlang.SwitchDefinition:
-	case astlang.FieldDefinition:
-	case astlang.FutureDefinition:
-	case astlang.ChannelDefinition:
-	case astlang.StreamDefinition:
+	case rewrite.AnnotationDefinition:
+	case rewrite.CommentDefinition:
+	case rewrite.ResultDefinition:
+	case rewrite.DataDefinition:
+	case rewrite.DataTypeDefinition:
+	case rewrite.ConditionDefinition:
+	case rewrite.IfDefinition:
+	case rewrite.ReturnDefinition:
+	case rewrite.LoopDefinition:
+	case rewrite.ForDefinition:
+	case rewrite.CaseDefinition:
+	case rewrite.SwitchDefinition:
+	case rewrite.FieldDefinition:
+	case rewrite.FutureDefinition:
+	case rewrite.ChannelDefinition:
+	case rewrite.StreamDefinition:
 	}
 }
 
-func renderVariable(file *jen.File, variableDefinition astlang.VariableDefinition) {
+func renderVariable(file *jen.File, variableDefinition rewrite.VariableDefinition) {
 	file.Var().Id(variableDefinition.GetName())
 	render(file, variableDefinition.Type)
 	if variableDefinition.Assign != nil {
@@ -52,6 +51,6 @@ func renderVariable(file *jen.File, variableDefinition astlang.VariableDefinitio
 	}
 }
 
-func renderAssignment(file *jen.File, def astlang.AssignmentDefinition) {
+func renderAssignment(file *jen.File, def rewrite.AssignmentDefinition) {
 
 }
