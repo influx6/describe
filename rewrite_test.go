@@ -1,16 +1,16 @@
-package restark_test
+package rewrite_test
 
 import (
 	"errors"
 	"testing"
 
-	"github.com/influx6/restark"
+	"github.com/influx6/rewrite"
 	"github.com/stretchr/testify/require"
 )
 
 func TestStackDefinitions(t *testing.T) {
 	var jsondef JSONDefinition
-	var res, err = restark.Define(func(obj *restark.DefStack) {
+	var res, err = rewrite.Define(func(obj *rewrite.Description) {
 		Object(obj, func() {
 			Name(obj, "Nature")
 			Desc(obj, "Desc")
@@ -50,7 +50,7 @@ func (j *Rob) Apply(v interface{}) error {
 	return nil
 }
 
-func Object(r *restark.DefStack, fn func()) {
+func Object(r *rewrite.Description, fn func()) {
 	var obj Rob
 
 	// Push object into task so functions
@@ -75,7 +75,7 @@ func Object(r *restark.DefStack, fn func()) {
 	objParent.Target = &obj
 }
 
-func Name(r *restark.DefStack, name string) {
+func Name(r *rewrite.Description, name string) {
 	var parent, err = r.Get()
 	if err != nil {
 		return
@@ -90,7 +90,7 @@ func Name(r *restark.DefStack, name string) {
 	objParent.Name = name
 }
 
-func Desc(r *restark.DefStack, desc string) {
+func Desc(r *rewrite.Description, desc string) {
 	var parent, err = r.Get()
 	if err != nil {
 		return
