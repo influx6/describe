@@ -15,11 +15,11 @@ type DefinitionMiddleware func(source Applicable) (Applicable, error)
 // given function.
 type Applicable interface {
 	Elem() interface{}
-	Apply(interface{}) error
 }
 
 // To allow stack-like operations on a series of Applicable.
 type Stack interface {
+	Release() (parent, child Applicable)
 	Current() Applicable
 	Root() Applicable
 	Pop() Applicable
@@ -27,7 +27,6 @@ type Stack interface {
 	IsUsable() bool
 	SetErr(err error)
 	Err() error
-	Release()
 }
 
 // Definition defines a function type which represents

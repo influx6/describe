@@ -9,7 +9,7 @@ type CanName interface {
 }
 
 func UseName(target *Description, name string)   {
-	if canName, ok := target.Get().(CanName); ok {
+	if canName, ok := target.Current().(CanName); ok {
 		canName.SetName(name)
 		return
 	}
@@ -21,7 +21,7 @@ type CanDescription interface {
 }
 
 func UseDescription(target *Description, desc string)   {
-	if can, ok := target.Get().(CanDescription); ok {
+	if can, ok := target.Current().(CanDescription); ok {
 		can.SetDescription(desc)
 		return
 	}
@@ -33,7 +33,7 @@ type CanVersion interface {
 }
 
 func UseVersion(target *Description, version string)   {
-	if can, ok := target.Get().(CanVersion); ok {
+	if can, ok := target.Current().(CanVersion); ok {
 		can.SetVersion(version)
 		return
 	}
@@ -41,7 +41,7 @@ func UseVersion(target *Description, version string)   {
 }
 
 func UseBaseType(target *Description, baseType rewrite.BaseType)   {
-	if typeDefinition, ok := target.Get().(*rewrite.TypeDefinition); ok {
+	if typeDefinition, ok := target.Current().(*rewrite.TypeDefinition); ok {
 		typeDefinition.Type = baseType
 		return
 	}
@@ -49,7 +49,7 @@ func UseBaseType(target *Description, baseType rewrite.BaseType)   {
 }
 
 func UseMemory(target *Description, mem rewrite.MemoryLayout)   {
-	if typeDefinition, ok := target.Get().(*rewrite.TypeDefinition); ok {
+	if typeDefinition, ok := target.Current().(*rewrite.TypeDefinition); ok {
 		typeDefinition.Memory = mem
 		return
 	}
@@ -72,13 +72,13 @@ func UseComment(target *Description, fn func()) rewrite.CommentDefinition {
 }
 
 func UseCommentText(target *Description, text string) {
-	if comment, ok := target.Get().Elem().(*rewrite.CommentDefinition); ok {
+	if comment, ok := target.Current().Elem().(*rewrite.CommentDefinition); ok {
 		comment.Contents = append(comment.Contents, text)
 	}
 }
 
 func UseValue(target *Description, value interface{})  {
-	//if obj, ok := target.Get().Elem().(*astlang.VariableDefinition); ok {
+	//if obj, ok := target.Current().Elem().(*astlang.VariableDefinition); ok {
 	//	//obj.Value = value
 	//}
 }
@@ -187,7 +187,7 @@ type CanBody interface {
 }
 
 func UseBody(target *Description, body rewrite.Applicable)  {
-	if canBody, ok := target.Get().Elem().(CanBody); ok {
+	if canBody, ok := target.Current().Elem().(CanBody); ok {
 		canBody.SetBody(body)
 	}
 }

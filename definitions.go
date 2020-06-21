@@ -1,7 +1,7 @@
 package rewrite
 
 type Meta struct {
-	Version     string `json:"version"`
+	Version string `json:"version"`
 }
 
 type Root struct {
@@ -26,20 +26,12 @@ func (bd *BaseDefinition) GetDescription() string {
 	return bd.Description
 }
 
-func (bd *BaseDefinition) SetDescription(desc string)  {
+func (bd *BaseDefinition) SetDescription(desc string) {
 	bd.Description = desc
 }
 
-func (bd *BaseDefinition) SetName(name string)  {
+func (bd *BaseDefinition) SetName(name string) {
 	bd.Name = name
-}
-
-func (bd *BaseDefinition) SetVersion(version string)  {
-	bd.Version = version
-}
-
-func (bd *BaseDefinition) Apply(item interface{}) error {
-	return ErrNotApplicable
 }
 
 const (
@@ -88,13 +80,6 @@ func (td PackageDefinition) Elem() interface{} {
 	return td
 }
 
-func (td *PackageDefinition) Apply(item interface{}) error {
-	if def, ok := item.(Applicable); ok {
-		td.Definitions = append(td.Definitions, def)
-	}
-	return ErrNotApplicable
-}
-
 // TypeDefinition defines the base definition for types.
 type TypeDefinition struct {
 	BaseDefinition
@@ -106,97 +91,14 @@ func (td TypeDefinition) Elem() interface{} {
 	return td
 }
 
-func (td *TypeDefinition) Apply(item interface{}) error {
-	switch ritem := item.(type) {
-	case BaseType:
-		td.Type = ritem
-	case MemoryLayout:
-		td.Memory = ritem
-	case *BaseDefinition:
-		td.BaseDefinition = *ritem
-	case BaseDefinition:
-		td.BaseDefinition = ritem
-	}
-	return ErrNotApplicable
-}
-
-// MethodDefinition defines the base definition for methods.
-type MethodDefinition struct {
+type CallDefinition struct {
 	BaseDefinition
-	Arguments []FieldDefinition
-	Returns   []ReturnDefinition
-	Data      Applicable
-}
-
-func (td MethodDefinition) Elem() interface{} {
-	return td
-}
-
-func (td *MethodDefinition) Apply(item interface{}) error {
-	switch ritem := item.(type) {
-	case *ReturnDefinition:
-		td.Returns = append(td.Returns, *ritem)
-		return nil
-	case *FieldDefinition:
-		td.Arguments = append(td.Arguments, *ritem)
-		return nil
-	case ReturnDefinition:
-		td.Returns = append(td.Returns, ritem)
-		return nil
-	case FieldDefinition:
-		td.Arguments = append(td.Arguments, ritem)
-		return nil
-	case *BaseDefinition:
-		td.BaseDefinition = *ritem
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = ritem
-		return nil
-	case Applicable:
-		td.Data = ritem
-	}
-	return ErrNotApplicable
-}
-
-type MethodCallDefinition struct {
-	BaseDefinition
+	Target    Applicable
 	Arguments []VariableDefinition
-	Results []ResultDefinition
-	Method *MethodDefinition
 }
 
-func (td MethodCallDefinition) Elem() interface{} {
+func (td CallDefinition) Elem() interface{} {
 	return td
-}
-
-func (td *MethodCallDefinition) Apply(item interface{}) error {
-	switch ritem := item.(type) {
-	case *ResultDefinition:
-		td.Results = append(td.Results, *ritem)
-		return nil
-	case ResultDefinition:
-		td.Results = append(td.Results, ritem)
-		return nil
-	case *VariableDefinition:
-		td.Arguments = append(td.Arguments, *ritem)
-		return nil
-	case VariableDefinition:
-		td.Arguments = append(td.Arguments, ritem)
-		return nil
-	case *BaseDefinition:
-		td.BaseDefinition = *ritem
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = ritem
-		return nil
-	case *MethodDefinition:
-		td.Method = ritem
-		return nil
-	case MethodDefinition:
-		td.Method = &ritem
-		return nil
-	}
-	return ErrNotApplicable
 }
 
 type CommentDefinition struct {
@@ -208,24 +110,6 @@ func (td CommentDefinition) Elem() interface{} {
 	return td
 }
 
-func (td *CommentDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case string:
-		td.Contents = append(td.Contents, value)
-		return nil
-	case []string:
-		td.Contents = append(td.Contents, value...)
-		return nil
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	}
-	return ErrNotApplicable
-}
-
 type AnnotationDefinition struct {
 	BaseDefinition
 	Content string
@@ -233,21 +117,6 @@ type AnnotationDefinition struct {
 
 func (td AnnotationDefinition) Elem() interface{} {
 	return td
-}
-
-func (td *AnnotationDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case string:
-		td.Content = value
-		return nil
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	}
-	return ErrNotApplicable
 }
 
 type ResultDefinition struct {
@@ -260,30 +129,13 @@ func (td ResultDefinition) Elem() interface{} {
 	return td
 }
 
-func (td *ResultDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	}
-	return ErrNotApplicable
-}
-
 type Value struct {
 	BaseDefinition
-	Value Applicable
-	Short bool // should use := instead of =
+	Value interface{}
 }
 
 func (td Value) Elem() interface{} {
 	return td
-}
-
-func (td *Value) Apply(item interface{}) error {
-	return ErrNotApplicable
 }
 
 type AssignmentDefinition struct {
@@ -294,10 +146,6 @@ type AssignmentDefinition struct {
 
 func (td AssignmentDefinition) Elem() interface{} {
 	return td
-}
-
-func (td *AssignmentDefinition) Apply(item interface{}) error {
-	return ErrNotApplicable
 }
 
 type VariableDefinition struct {
@@ -311,32 +159,13 @@ func (td VariableDefinition) Elem() interface{} {
 	return td
 }
 
-func (td *VariableDefinition) Apply(item interface{}) error {
-	return ErrNotApplicable
-}
-
 type ReturnDefinition struct {
 	BaseDefinition
-	Type Applicable
+	Targets []Applicable
 }
 
 func (td ReturnDefinition) Elem() interface{} {
 	return td
-}
-
-func (td *ReturnDefinition) Apply(item interface{}) error {
-	if value, ok := item.(Applicable); ok {
-		td.Type = value
-	}
-	switch value := item.(type) {
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	}
-	return ErrNotApplicable
 }
 
 type FieldDefinition struct {
@@ -348,79 +177,34 @@ func (td FieldDefinition) Elem() interface{} {
 	return td
 }
 
-func (td *FieldDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	case Applicable:
-		td.Type = value
-		return nil
-	}
-	return ErrNotApplicable
+type LiteralDefinition struct {
+	BaseDefinition
+	Literal string
+}
+
+func (td LiteralDefinition) Elem() interface{} {
+	return td
 }
 
 // DataType represents a defined type where the type is a previously
 // created data type.
 type DataTypeDefinition struct {
 	BaseDefinition
-	Type Applicable
+	Type string
 }
 
 func (td DataTypeDefinition) Elem() interface{} {
 	return td
 }
 
-func (td *DataTypeDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	case Applicable:
-		td.Type = value
-		return nil
-	}
-	return ErrNotApplicable
-}
-
 type DataDefinition struct {
 	BaseDefinition
-	Fields []FieldDefinition
-	Methods []MethodDefinition
+	Fields  []FieldDefinition
+	Methods []Function
 }
 
 func (td DataDefinition) Elem() interface{} {
 	return td
-}
-
-func (td *DataDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	case []MethodDefinition:
-		td.Methods = append(td.Methods, value...)
-		return nil
-	case []FieldDefinition:
-		td.Fields = append(td.Fields, value...)
-		return nil
-	case MethodDefinition:
-		td.Methods = append(td.Methods, value)
-		return nil
-	case FieldDefinition:
-		td.Fields = append(td.Fields, value)
-		return nil
-	}
-	return ErrNotApplicable
 }
 
 type IfDefinition struct {
@@ -437,26 +221,9 @@ func (td IfDefinition) Elem() interface{} {
 	return td
 }
 
-func (td *IfDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	case ConditionDefinition:
-		td.Condition = value
-		return nil
-	case *ConditionDefinition:
-		td.Condition = *value
-		return nil
-	}
-	return ErrNotApplicable
-}
-
 const (
 	Equal       Operator = iota + 1 // =
+	ShortEqual                      // :=
 	NotEquality                     // !=
 	Equality                        // ==
 	Increment                       // ++
@@ -466,24 +233,26 @@ const (
 	Division
 	Addition
 	SelfMultiplication // *=
-	SelfSubtraction // -=
-	SelfDivision // -=
-	SelfAddition // +=
-	Modulo // %
+	SelfSubtraction    // -=
+	SelfDivision       // -=
+	SelfAddition       // +=
+	Modulo             // %
 	LessThan
 	GreaterThan
 	LessThanEqualTo
 	GreaterThanEqualTo
-	ConditionalAnd // &&
-	ConditionalOR // ||
-	BinaryAnd // &
-	BinaryOR // |
-	BitwiseNot // !
-	BitwiseAnd // &
-	BitwiseOR // !
-	BitwiseXOR // ^
-	LeftShift // <<
-	RightShift // >>
+	ConditionalAnd  // &&
+	ConditionalOR   // ||
+	BinaryAnd       // &
+	BinaryOR        // |
+	BitwiseNot      // ~
+	BitwiseAnd      // &
+	BitwiseOR       // |
+	BitwiseXOR      // ^
+	LeftShift       // <<
+	RightShift      // >>
+	PointerAnd      // &
+	PointerAsterick // *
 )
 
 type Operator int
@@ -497,52 +266,6 @@ func (td OperatorDefinition) Elem() interface{} {
 	return td
 }
 
-func (td *OperatorDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case Operator:
-		td.Operator = value
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	}
-	return ErrNotApplicable
-}
-
-type LoopDefinition struct {
-	BaseDefinition
-	Condition ConditionDefinition
-	Body      Applicable
-}
-
-func (td LoopDefinition) SetBody(body Applicable) {
-	td.Body = body
-}
-
-func (td LoopDefinition) Elem() interface{} {
-	return td
-}
-
-func (td *LoopDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	case ConditionDefinition:
-		td.Condition = value
-		return nil
-	case *ConditionDefinition:
-		td.Condition = *value
-		return nil
-	}
-	return ErrNotApplicable
-}
-
 type ConditionDefinition struct {
 	BaseDefinition
 	Left     Applicable
@@ -554,21 +277,9 @@ func (td ConditionDefinition) Elem() interface{} {
 	return td
 }
 
-func (td *ConditionDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	}
-	return ErrNotApplicable
-}
-
 type ForDefinition struct {
 	BaseDefinition
-	Left   Applicable
+	Start  Applicable
 	Middle Applicable
 	End    Applicable
 	Body   Applicable
@@ -580,18 +291,6 @@ func (td ForDefinition) SetBody(body Applicable) {
 
 func (td ForDefinition) Elem() interface{} {
 	return td
-}
-
-func (td *ForDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	}
-	return ErrNotApplicable
 }
 
 type CaseDefinition struct {
@@ -608,18 +307,6 @@ func (td CaseDefinition) Elem() interface{} {
 	return td
 }
 
-func (td *CaseDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	}
-	return ErrNotApplicable
-}
-
 type SwitchDefinition struct {
 	BaseDefinition
 	Cases     []CaseDefinition
@@ -628,24 +315,6 @@ type SwitchDefinition struct {
 
 func (td SwitchDefinition) Elem() interface{} {
 	return td
-}
-
-func (td *SwitchDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case ConditionDefinition:
-		td.Condition = value
-	case CaseDefinition:
-		td.Cases = append(td.Cases, value)
-	case []CaseDefinition:
-		td.Cases = append(td.Cases, value...)
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	}
-	return ErrNotApplicable
 }
 
 const (
@@ -666,23 +335,6 @@ func (td ChannelDefinition) Elem() interface{} {
 	return td
 }
 
-func (td *ChannelDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case Direction:
-		td.Direction = value
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	case Applicable:
-		td.Type = value
-		return nil
-	}
-	return ErrNotApplicable
-}
-
 type FutureDefinition struct {
 	BaseDefinition
 	Type Applicable
@@ -692,22 +344,20 @@ func (td FutureDefinition) Elem() interface{} {
 	return td
 }
 
-func (td *FutureDefinition) Apply(item interface{}) error {
-	if futureType, ok := item.(Applicable); ok {
-		td.Type = futureType
-	}
-	switch value := item.(type) {
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	case Applicable:
-		td.Type = value
-		return nil
-	}
-	return ErrNotApplicable
+type Function struct {
+	BaseDefinition
+	Pointer bool
+	Returns []ResultDefinition
+	Accepts []VariableDefinition
+	Body    []Applicable
+}
+
+func (td Function) Elem() interface{} {
+	return td
+}
+
+type AsyncFunction struct {
+	Function
 }
 
 type StreamDefinition struct {
@@ -717,19 +367,4 @@ type StreamDefinition struct {
 
 func (td StreamDefinition) Elem() interface{} {
 	return td
-}
-
-func (td *StreamDefinition) Apply(item interface{}) error {
-	switch value := item.(type) {
-	case *BaseDefinition:
-		td.BaseDefinition = *value
-		return nil
-	case BaseDefinition:
-		td.BaseDefinition = value
-		return nil
-	case Applicable:
-		td.Type = value
-		return nil
-	}
-	return ErrNotApplicable
 }
